@@ -47,6 +47,7 @@ def play():
         if winner != None:
             break
         print('It was a tie, play again')
-    print(f'{winner} Wins!')
+    print(f'{winner} wins!')
 
-play()
+if __name__ == '__main__':
+    play()
