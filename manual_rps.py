@@ -44,7 +44,7 @@ def play():
         user_choice = get_user_choice()
         winner = get_winner(computer_choice = computer_choice, user_choice = user_choice)
         print(f'The computer picked {computer_choice}')
-        if winner != None:
+        if winner:
             break
         print('It was a tie, play again')
     print(f'{winner} wins!')
