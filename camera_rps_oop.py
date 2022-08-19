@@ -4,28 +4,28 @@ import numpy as np
 from time import time
 from random import choice
 
-
+#change input to rounds to win, validate to odd, then set rounds to win to (n+1)/2
 
 class Computer_Vision_RPS:
     
-    def __init__(self, countdown_time: int, model_file, labels, num_lives):
-        self.countdown_time = countdown_time
-        self.num_lives= num_lives
-        self.user_lives = num_lives
-        self.computer_lives = num_lives
+    def __init__(self, countdown_time: int, model_file, labels_file, num_lives):
+        self.countdown_time = countdown_time #validate to > 0
+        self.num_lives= num_lives#change to wins
+        self.user_lives = num_lives#change to wins
+        self.computer_lives = num_lives#change to wins 
         self.capture = cv2.VideoCapture(0)
         self.model = load_model(model_file)
         self.data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-        self.labels = {}
+        self.labels = self.load_labels(labels_file)
+        
+    def load_labels(self, labels):
+        label_dict = {}
         with open(labels) as file:
             for line in file:
                 key, value = line.split()
-                self.labels[int(key)] = value
+                label_dict[int(key)] = value
+        return label_dict
 
-    def get_prediction(self, data):
-        prediction = self.model.predict(data)
-        return self.labels[np.argmax(prediction)]
-    
     def get_prediction(self):
         time_delta = float()
         init_time = time()
@@ -37,7 +37,7 @@ class Computer_Vision_RPS:
                 break
         resized_frame = cv2.resize(cv2.flip(frame, 1), (224, 224), interpolation = cv2.INTER_AREA)
         image_np = np.array(resized_frame)
-        normalized_image = (image_np.astype(np.float32) / 127.0) - 1 # Normalize the image
+        normalized_image = (image_np.astype(np.float32) / 127.0) - 1
         self.data[0] = normalized_image
         user_choice = self.labels[np.argmax(self.model.predict(self.data))]
         return user_choice
@@ -59,7 +59,6 @@ class Computer_Vision_RPS:
         else:
             print('Nobody won this round!')
 
-
     def play(self):
         while self.user_lives >0 and self.computer_lives >0:
             self.round()
@@ -69,6 +68,10 @@ class Computer_Vision_RPS:
             print(f'You won {self.num_lives} times! You won!')
 
     def get_winner(self, computer_choice: str, user_choice:str):
+        #rock = {}
+        #paper = {}
+        #scissors = {}
+
         if user_choice == 'rock':
             if computer_choice =='rock':
                 winner = None
@@ -94,8 +97,13 @@ class Computer_Vision_RPS:
             winner = None
         return winner
 
-game = Computer_Vision_RPS(countdown_time = 3, model_file = 'keras_model.h5', labels = 'labels.txt', num_lives = 3)
-def play(exitf):
+    def reset(self):
+        self.user_lives = self.num_lives#change to wins
+        self.computer_lives = self.num_lives#change to wins
+
+
+def play_game():
+    game = Computer_Vision_RPS(countdown_time = 3, model_file = 'keras_model.h5', labels_file = 'labels.txt', num_lives = 3)
     while True:
         if exitf:
             exit()
@@ -105,12 +113,11 @@ def play(exitf):
             ret, frame = game.capture.read()
             cv2.imshow('frame', frame)
             if cv2.waitKey(1) & 0xFF == ord('c'):
-                game.computer_lives= 3
-                game.user_lives = 3
+                game.reset()
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 exitf = True
                 break
 
 if __name__ == '__main__':
-    play(exitf=False)
+    play_game()
