@@ -113,7 +113,7 @@ def play_game():
         while True:
             ret, frame = game.capture.read()
             cv2.imshow('frame', frame)
-            key_pressed = cv2.waitKey & 0xFF
+            key_pressed = cv2.waitKey(1) & 0xFF
             if key_pressed == ord('c'):
                 game.reset()
                 break
