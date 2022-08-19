@@ -103,11 +103,8 @@ class Computer_Vision_RPS:
 
 
 def play_game():
-    exitf = False
     game = Computer_Vision_RPS(countdown_time = 3, model_file = 'keras_model.h5', labels_file = 'labels.txt', num_lives = 3)
     while True:
-        if exitf:
-            return
         game.play()
         print('Press c to play again, or q quit')
         while True:
@@ -118,8 +115,7 @@ def play_game():
                 game.reset()
                 break
             if key_pressed == ord('q'):
-                exitf = True
-                break
+                return
 
 if __name__ == '__main__':
     play_game()
