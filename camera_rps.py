@@ -9,7 +9,9 @@ class Computer_Vision_RPS:
     
     def __init__(self, countdown_time: int, model_file, labels_file, num_wins: int):
         self.countdown_time = countdown_time if countdown_time > 0 else 3
-        self.timer_text = '321'
+        self.timer_text = [f'{i}' for i in range(1, self.countdown_time+1)]
+        self.timer_text = self.timer_text[::-1]
+        self.timer_text.append('Go!')
         self.num_wins= num_wins
         self.user_wins = 0
         self.computer_wins = 0 
@@ -32,7 +34,7 @@ class Computer_Vision_RPS:
         time_delta = float()
         seconds_passed = int()
         init_time = datetime.now()
-        while seconds_passed < self.countdown_time:
+        while seconds_passed < self.countdown_time + 1:
             time_delta = (datetime.now() - init_time).total_seconds()
             ret, frame = self.capture.read()
             cv2.putText(
