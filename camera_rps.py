@@ -1,18 +1,21 @@
 import cv2 
 from keras.models import load_model
 import numpy as np
-from time import time
+from datetime import datetime
 from random import choice
 
 
 class Computer_Vision_RPS:
     
-    def __init__(self, countdown_time: int, model_file, labels_file, num_wins):
-        self.countdown_time = countdown_time #validate to > 0
+    def __init__(self, countdown_time: int, model_file, labels_file, num_wins: int):
+        self.countdown_time = countdown_time if countdown_time > 0 else 3
+        self.timer_text = '321'
         self.num_wins= num_wins
         self.user_wins = 0
         self.computer_wins = 0 
         self.capture = cv2.VideoCapture(0)
+        self.frame_width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.frame_height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))  
         self.model = load_model(model_file)
         self.data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
         self.labels = self.load_labels(labels_file)
@@ -27,13 +30,23 @@ class Computer_Vision_RPS:
 
     def get_prediction(self):
         time_delta = float()
-        init_time = time()
-        while time_delta < self.countdown_time:
-            time_delta = abs(init_time - time())
+        seconds_passed = int()
+        init_time = datetime.now()
+        while seconds_passed < self.countdown_time:
+            time_delta = (datetime.now() - init_time).total_seconds()
             ret, frame = self.capture.read()
-            cv2.imshow('frame', frame)
+            if time_delta > 1:
+                cv2.putText(img = frame, text = self.timer_text[seconds_passed], fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 6, color = (255,255,255),thickness = 5,
+                 org = ((int(self.frame_width/2)), int(self.frame_height/2)), 
+                 lineType= cv2.LINE_AA)
+                second_time_delta = 0
+                cv2.imshow('frame', frame)
+                seconds_passed +=1
+                time_delta = 0
+                init_time = datetime.now()
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+                return
+        ret, frame = self.capture.read()
         resized_frame = cv2.resize(cv2.flip(frame, 1), (224, 224), interpolation = cv2.INTER_AREA)
         image_np = np.array(resized_frame)
         normalized_image = (image_np.astype(np.float32) / 127.0) - 1
@@ -45,7 +58,11 @@ class Computer_Vision_RPS:
         return choice(['rock', 'paper', 'scissors'])
 
     def round(self):
-        user_choice = self.get_prediction().lower()
+        try:
+            user_choice = self.get_prediction().lower()
+        except AttributeError:
+            print('You quit the game')
+            exit()
         computer_choice = self.get_computer_choice()
         winner = self.get_winner(computer_choice, user_choice)
         print(f'You chose {user_choice}\nThe computer chose {computer_choice}')
@@ -67,13 +84,13 @@ class Computer_Vision_RPS:
             print(f'The computer won {self.num_wins} times, you lost!')
 
     def get_winner(self, computer_choice: str, user_choice:str):
-        
-        logic_dict = {'rock':{'rock':None, 'paper':'computer', 'scissors':'user'},
+        user_choice_dict = {
+        'rock':{'rock':None, 'paper':'computer', 'scissors':'user'},
         'paper':{'rock':'user', 'paper':None, 'scissors':'computer'},
         'scissors':{'rock':'computer', 'paper':'user', 'scissors':None},
-        'nothing':{'rock':None, 'paper':None, 'scissors':None}}
-
-        return logic_dict[user_choice][computer_choice]
+        'nothing':{'rock':None, 'paper':None, 'scissors':None}
+        }
+        return user_choice_dict[user_choice][computer_choice]
 
 
     def reset(self):
@@ -83,6 +100,16 @@ class Computer_Vision_RPS:
 
 def play_game():
     game = Computer_Vision_RPS(countdown_time = 3, model_file = 'keras_model.h5', labels_file = 'labels.txt', num_wins = 3)
+    print('Welcome to computer vision rock paper scissors!\nPress c to play or press q to quit')
+    while True:
+        ret, frame = game.capture.read()
+        cv2.imshow('frame', frame)
+        key_pressed_startup = cv2.waitKey(1) & 0xFF
+        if key_pressed_startup == ord('c'):
+            game.reset()
+            break
+        if key_pressed_startup == ord('q'):
+            return
     while True:
         game.play()
         print('Press c to play again, or q quit')
