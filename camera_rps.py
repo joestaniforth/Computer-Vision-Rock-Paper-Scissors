@@ -14,7 +14,13 @@ class Computer_Vision_RPS:
         self.timer_text.append('Go!')
         self.num_wins= num_wins
         self.user_wins = 0
-        self.computer_wins = 0 
+        self.computer_wins = 0
+        self.user_choice_dict = {
+        'rock':{'rock':None, 'paper':'computer', 'scissors':'user'},
+        'paper':{'rock':'user', 'paper':None, 'scissors':'computer'},
+        'scissors':{'rock':'computer', 'paper':'user', 'scissors':None},
+        'nothing':{'rock':None, 'paper':None, 'scissors':None}
+        }
         self.capture = cv2.VideoCapture(0)
         self.frame_width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.frame_height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))  
@@ -44,17 +50,16 @@ class Computer_Vision_RPS:
                     fontScale = 6, 
                     color = (255,255,255),
                     thickness = 5,
-                    org = ((int(self.frame_width/2)), int(self.frame_height/2)), 
+                    org = ((int(self.frame_width/2)-20), (int(self.frame_height/2)-20)), 
                     lineType= cv2.LINE_AA)
             cv2.imshow('frame', frame)
             if time_delta > 1:
                 seconds_passed +=1
-                time_delta = 0
                 init_time = datetime.now()
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 return
         ret, frame = self.capture.read()
-        resized_frame = cv2.resize(cv2.flip(frame, 1), (224, 224), interpolation = cv2.INTER_AREA)
+        resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
         image_np = np.array(resized_frame)
         normalized_image = (image_np.astype(np.float32) / 127.0) - 1
         self.data[0] = normalized_image
@@ -68,8 +73,8 @@ class Computer_Vision_RPS:
         try:
             user_choice = self.get_prediction().lower()
         except AttributeError:
-            print('You quit the game')
-            exit()
+            print('You canceled the game')
+            return 'quit'
         computer_choice = self.get_computer_choice()
         winner = self.get_winner(computer_choice, user_choice)
         print(f'You chose {user_choice}\nThe computer chose {computer_choice}')
@@ -84,20 +89,15 @@ class Computer_Vision_RPS:
 
     def play(self):
         while self.user_wins < self.num_wins and self.computer_wins < self.num_wins:
-            self.round()
+            if self.round() == 'quit':
+                return
         if self.user_wins == self.num_wins:
             print(f'You won {self.num_wins} times! You won!')
         elif self.computer_wins == self.num_wins:
             print(f'The computer won {self.num_wins} times, you lost!')
 
     def get_winner(self, computer_choice: str, user_choice:str):
-        user_choice_dict = {
-        'rock':{'rock':None, 'paper':'computer', 'scissors':'user'},
-        'paper':{'rock':'user', 'paper':None, 'scissors':'computer'},
-        'scissors':{'rock':'computer', 'paper':'user', 'scissors':None},
-        'nothing':{'rock':None, 'paper':None, 'scissors':None}
-        }
-        return user_choice_dict[user_choice][computer_choice]
+        return self.user_choice_dict[user_choice][computer_choice]
 
 
     def reset(self):
