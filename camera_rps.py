@@ -35,8 +35,7 @@ class Computer_Vision_RPS:
         while seconds_passed < self.countdown_time:
             time_delta = (datetime.now() - init_time).total_seconds()
             ret, frame = self.capture.read()
-            if time_delta > 1:
-                cv2.putText(
+            cv2.putText(
                     img = frame, 
                     text = self.timer_text[seconds_passed], 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
@@ -45,7 +44,8 @@ class Computer_Vision_RPS:
                     thickness = 5,
                     org = ((int(self.frame_width/2)), int(self.frame_height/2)), 
                     lineType= cv2.LINE_AA)
-                cv2.imshow('frame', frame)
+            cv2.imshow('frame', frame)
+            if time_delta > 1:
                 seconds_passed +=1
                 time_delta = 0
                 init_time = datetime.now()
