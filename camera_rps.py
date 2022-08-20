@@ -36,10 +36,15 @@ class Computer_Vision_RPS:
             time_delta = (datetime.now() - init_time).total_seconds()
             ret, frame = self.capture.read()
             if time_delta > 1:
-                cv2.putText(img = frame, text = self.timer_text[seconds_passed], fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 6, color = (255,255,255),thickness = 5,
-                 org = ((int(self.frame_width/2)), int(self.frame_height/2)), 
-                 lineType= cv2.LINE_AA)
-                second_time_delta = 0
+                cv2.putText(
+                    img = frame, 
+                    text = self.timer_text[seconds_passed], 
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                    fontScale = 6, 
+                    color = (255,255,255),
+                    thickness = 5,
+                    org = ((int(self.frame_width/2)), int(self.frame_height/2)), 
+                    lineType= cv2.LINE_AA)
                 cv2.imshow('frame', frame)
                 seconds_passed +=1
                 time_delta = 0
@@ -99,7 +104,11 @@ class Computer_Vision_RPS:
 
 
 def play_game():
-    game = Computer_Vision_RPS(countdown_time = 3, model_file = 'keras_model.h5', labels_file = 'labels.txt', num_wins = 3)
+    game = Computer_Vision_RPS(
+        countdown_time = 3, 
+        model_file = 'keras_model.h5', 
+        labels_file = 'labels.txt', 
+        num_wins = 3)
     print('Welcome to computer vision rock paper scissors!\nPress c to play or press q to quit')
     while True:
         ret, frame = game.capture.read()
