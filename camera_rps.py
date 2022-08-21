@@ -43,6 +43,9 @@ class Computer_Vision_RPS:
         while seconds_passed < self.countdown_time + 1:
             time_delta = (datetime.now() - init_time).total_seconds()
             ret, frame = self.capture.read()
+            textsize = cv2.getTextSize(text = self.timer_text[seconds_passed], fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 6, thickness = 5)[0]
+            textX = (frame.shape[1] - textsize[0]) / 2
+            textY = (frame.shape[0] + textsize[1]) /  2
             cv2.putText(
                     img = frame, 
                     text = self.timer_text[seconds_passed], 
@@ -50,7 +53,7 @@ class Computer_Vision_RPS:
                     fontScale = 6, 
                     color = (255,255,255),
                     thickness = 5,
-                    org = ((int(self.frame_width/2)-20), (int(self.frame_height/2)-20)), 
+                    org = (int(textX), int(textY)), 
                     lineType= cv2.LINE_AA)
             cv2.imshow('frame', frame)
             if time_delta > 1:
@@ -73,7 +76,7 @@ class Computer_Vision_RPS:
         try:
             user_choice = self.get_prediction().lower()
         except AttributeError:
-            print('You canceled the game')
+            print('You canceled the round')
             return 'quit'
         computer_choice = self.get_computer_choice()
         winner = self.get_winner(computer_choice, user_choice)
