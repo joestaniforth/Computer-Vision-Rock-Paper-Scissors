@@ -22,8 +22,6 @@ class Computer_Vision_RPS:
         'nothing':{'rock':None, 'paper':None, 'scissors':None}
         }
         self.capture = cv2.VideoCapture(0)
-        self.frame_width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.frame_height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))  
         self.model = load_model(model_file)
         self.data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
         self.labels = self.load_labels(labels_file)
